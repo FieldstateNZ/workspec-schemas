@@ -1,0 +1,31 @@
+name: Verify live schemas match repo
+
+# Pre-cutover check: confirms the copies in this repo are byte-identical to
+# whatever https://schema.workspec.io currently serves. Run manually before
+# moving the custom domain to this repo; after cutover the live URLs serve
+# this repo's content, so a pass is expected but no longer meaningful.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare live schemas against repo copies
+        run: |
+          set -euo pipefail
+          status=0
+          for name in decision catalog; do
+            curl -fsSL "https://schema.workspec.io/v1alpha1/${name}.schema.json" -o "/tmp/${name}.live.json"
+            if cmp -s "/tmp/${name}.live.json" "v1alpha1/${name}.schema.json"; then
+              echo "OK: v1alpha1/${name}.schema.json is byte-identical to the live copy"
+            else
+              echo "MISMATCH: v1alpha1/${name}.schema.json differs from the live copy"
+              diff "/tmp/${name}.live.json" "v1alpha1/${name}.schema.json" || true
+              status=1
+            fi
+          done
+          exit "$status"
