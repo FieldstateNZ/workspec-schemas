@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorkSpec Schema Registry</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 44rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.6; color: #1a1a1a; }
+    h1 { font-size: 1.5rem; }
+    code { background: #f2f2f2; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+    table { border-collapse: collapse; width: 100%; margin: 1.5rem 0; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #ddd; }
+    footer { margin-top: 3rem; font-size: 0.85rem; color: #666; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #111; color: #ddd; }
+      code { background: #222; }
+      th, td { border-color: #333; }
+      a { color: #8ab4f8; }
+      footer { color: #999; }
+    }
+  </style>
+</head>
+<body>
+  <h1>WorkSpec Schema Registry</h1>
+  <p>
+    Canonical JSON Schemas (draft 2020-12) for the WorkSpec artifact family.
+    Bind an artifact to its schema with a <code>yaml-language-server</code> directive:
+  </p>
+  <p><code># yaml-language-server: $schema=https://schema.workspec.io/v1alpha1/decision.schema.json</code></p>
+
+  <h2>v1alpha1</h2>
+  <table>
+    <thead>
+      <tr><th>Artifact</th><th>File suffix</th><th>Schema</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Decision</td>
+        <td><code>*.decision.yaml</code></td>
+        <td><a href="/v1alpha1/decision.schema.json">v1alpha1/decision.schema.json</a></td>
+      </tr>
+      <tr>
+        <td>Catalog</td>
+        <td><code>*.catalog.yaml</code></td>
+        <td><a href="/v1alpha1/catalog.schema.json">v1alpha1/catalog.schema.json</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <footer>
+    Source: <a href="https://github.com/FieldstateNZ/workspec-schemas">FieldstateNZ/workspec-schemas</a>
+  </footer>
+</body>
+</html>
