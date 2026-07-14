@@ -1,27 +1,57 @@
 name: Publish schema registry
 
+# Deploys the schema registry to GitHub Pages (served at schema.workspec.io).
+#
+# Uses the official Pages artifact flow (configure-pages → upload-pages-artifact
+# → deploy-pages), which is what the repo's Pages "Source: GitHub Actions"
+# setting actually serves. The previous peaceiris/actions-gh-pages step pushed a
+# `gh-pages` branch that the Actions source ignores entirely, so nothing was ever
+# published and the domain fell back to GitHub's "Site not found" page.
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
+# One in-flight Pages deploy at a time; don't cancel a running publish.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  publish:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Stage site (repo root minus tooling/docs)
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='README.md' \
+            --exclude='_site' \
+            ./ _site/
+          # Preserve the custom domain, and serve every file verbatim (no Jekyll
+          # processing of the JSON schemas / dotfiles).
+          echo 'schema.workspec.io' > _site/CNAME
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
-          exclude_assets: '.github,README.md'
-          cname: schema.workspec.io
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
