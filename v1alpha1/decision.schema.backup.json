@@ -1,7 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.workspec.io/v1alpha1/decision.schema.json",
+  "$id": "https://schema.workspec.io/v1alpha1/decision.schema.backup.json",
   "title": "WorkSpec Decision (v1alpha1)",
+  "deprecated": true,
   "type": "object",
   "properties": {
     "apiVersion": {

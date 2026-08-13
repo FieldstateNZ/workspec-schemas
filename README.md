@@ -43,7 +43,7 @@ docs) with a `yaml-language-server` directive on the first line:
 index.html                      # root index listing the artifact family
 v1alpha1/
   decision.schema.json          # Active, repository-native Decision schema
-  decision.schema.backup.json   # Archived pre-core cost-analysis schema; never reference directly
+  decision.schema.backup.json   # Historical pre-core cost-analysis schema; non-canonical
   catalog.schema.json           # Legacy pricing catalog schema retained for compatibility
   c4/
     actor.schema.json           # JSON Schema (draft 2020-12) for C4 Actor elements
@@ -84,8 +84,9 @@ Every push to `main` deploys the repo content to GitHub Pages via
 The schemas are normally **generated, not hand-edited**. Product packages
 contribute their generated output to this registry. The active Decision schema
 is temporarily registry-owned while its lean core contract is adopted by the
-Studio tooling; `decision.schema.backup.json` preserves the previous cost-analysis
-contract and is not a canonical schema URL.
+Studio tooling. `decision.schema.backup.json` preserves the registry's displaced
+historical contract under a distinct, deprecated `$id`; it is not the active
+Decision schema or a general compatibility target for current Studio artifacts.
 
 Two packages currently contribute:
 

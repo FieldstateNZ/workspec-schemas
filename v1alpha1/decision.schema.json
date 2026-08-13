@@ -52,12 +52,14 @@
         "created": {
           "type": "string",
           "format": "date",
-          "description": "Date the decision record was created, in ISO 8601 full-date form."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Date the decision record was created, in quoted ISO 8601 full-date form (`YYYY-MM-DD`). Quote the value in YAML so parsers do not coerce it to a date object."
         },
         "decided": {
           "type": "string",
           "format": "date",
-          "description": "Date the decision was accepted or rejected, in ISO 8601 full-date form."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Date the decision was accepted or rejected, in quoted ISO 8601 full-date form (`YYYY-MM-DD`). Quote the value in YAML so parsers do not coerce it to a date object."
         },
         "deciders": {
           "type": "array",
@@ -89,7 +91,7 @@
             "type": "string",
             "minLength": 1
           },
-          "description": "Expected positive, negative, or neutral consequences of the decision."
+          "description": "Expected consequences of the decision."
         },
         "alternatives": {
           "type": "array",
@@ -126,20 +128,89 @@
           "items": {
             "type": "object",
             "properties": {
+              "cardinality": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "enum": [
+                      "0..1",
+                      "1",
+                      "1..1",
+                      "0..*",
+                      "1..*"
+                    ],
+                    "description": "Multiplicity at the source end."
+                  },
+                  "to": {
+                    "type": "string",
+                    "enum": [
+                      "0..1",
+                      "1",
+                      "1..1",
+                      "0..*",
+                      "1..*"
+                    ],
+                    "description": "Multiplicity at the target end."
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Optional human-readable relationship label."
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The link type, or `cardinality` for the optional relationship multiplicity."
+            },
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^(~/|@workspace/)",
+              "description": "A WorkSpec-tree (`~/`) or published-workspace (`@workspace/`) path reference."
+            },
+            "if": {
+              "required": [
+                "cardinality"
+              ]
+            },
+            "then": {
+              "minProperties": 2,
+              "maxProperties": 2
+            },
+            "else": {
+              "minProperties": 1,
+              "maxProperties": 1
+            }
+          },
+          "description": "Traversable relationships to WorkSpec artifacts: exactly one `{<linkType>: <pathRef>}` pair per entry, plus optional cardinality. Path refs must start with `~/` or `@workspace/`."
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
               "kind": {
                 "type": "string",
                 "minLength": 1,
-                "description": "Type of linked artifact or resource."
+                "description": "Type of supporting material, such as `issue`, `evidence`, `rfc`, or `spike`."
               },
               "target": {
                 "type": "string",
                 "minLength": 1,
-                "description": "URL, repository-relative path, or opaque reference resolved by the host."
+                "description": "A repository-relative path, absolute URL, or opaque external reference."
               },
               "label": {
                 "type": "string",
                 "minLength": 1,
-                "description": "Optional human-readable label for the link."
+                "description": "Optional human-readable label for the reference."
               }
             },
             "required": [
@@ -148,7 +219,7 @@
             ],
             "additionalProperties": false
           },
-          "description": "References to related artifacts or resources."
+          "description": "Supporting repository files, issues, evidence, RFCs, and external resources that are not traversable WorkSpec artifact relationships."
         },
         "tags": {
           "type": "array",
