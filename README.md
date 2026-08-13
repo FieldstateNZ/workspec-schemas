@@ -15,7 +15,7 @@ npm package `$id`s and into the `$schema` directive of every WorkSpec artifact:
 
 | Artifact                  | File suffix                                | Schema URL                                                          |
 | ------------------------- | ------------------------------------------- | -------------------------------------------------------------------- |
-| Decision                  | `*.decision.yaml`                          | `https://schema.workspec.io/v1alpha1/decision.schema.json`          |
+| Decision                  | `.workspec/decisions/<slug>.yaml`          | `https://schema.workspec.io/v1alpha1/decision.schema.json`          |
 | Catalog                   | `*.catalog.yaml`                           | `https://schema.workspec.io/v1alpha1/catalog.schema.json`           |
 | C4 Actor                  | `.workspec/actors/<slug>.yaml`             | `https://schema.workspec.io/v1alpha1/c4/actor.schema.json`          |
 | C4 System                 | `.workspec/system/<slug>.yaml`             | `https://schema.workspec.io/v1alpha1/c4/system.schema.json`         |
@@ -42,8 +42,9 @@ docs) with a `yaml-language-server` directive on the first line:
 ```
 index.html                      # root index listing the artifact family
 v1alpha1/
-  decision.schema.json          # JSON Schema (draft 2020-12) for Decision artifacts
-  catalog.schema.json           # JSON Schema (draft 2020-12) for Catalog artifacts
+  decision.schema.json          # Active, repository-native Decision schema
+  decision.schema.backup.json   # Historical pre-core cost-analysis schema; non-canonical
+  catalog.schema.json           # Legacy pricing catalog schema retained for compatibility
   c4/
     actor.schema.json           # JSON Schema (draft 2020-12) for C4 Actor elements
     system.schema.json          # JSON Schema (draft 2020-12) for the C4 System singleton
@@ -65,8 +66,11 @@ same flat version namespace (`v1alpha1/<kind>.schema.json`).
 ## Versioning policy
 
 One flat `v1alpha1/` namespace: **all artifact kinds version together as one
-model.** A breaking change to the artifact model introduces a new namespace
-(e.g. `v1beta1/`) alongside the old one; published versions are never mutated
+model.** The alpha namespace may receive intentional contract corrections while
+the model is being established; displaced contracts are retained as explicitly
+non-canonical backup files when migration work still needs them. Once a schema
+family advances beyond alpha, a breaking change introduces a new namespace
+(e.g. `v1beta1/`) alongside the old one and published versions are never mutated
 incompatibly or removed.
 
 ## Publishing
@@ -77,14 +81,30 @@ Every push to `main` deploys the repo content to GitHub Pages via
 
 ## How product repos contribute schemas
 
-The schemas are **generated, not hand-edited**. Two packages currently
-contribute:
+The schemas are normally **generated, not hand-edited**. Product packages
+contribute their generated output to this registry. The active Decision schema
+is temporarily registry-owned while its lean core contract is adopted by the
+Studio tooling. `decision.schema.backup.json` preserves the registry's displaced
+historical contract under a distinct, deprecated `$id`; it is not the active
+Decision schema or a general compatibility target for current Studio artifacts.
 
-- `@workspec/decision-schema` (Decision, Catalog) — Zod model source,
-  historically in
-  [`workspec-decision-studio`](https://github.com/FieldstateNZ/workspec-decision-studio);
-  that monorepo is being retired in favor of `workspec-studio` and this
-  reference is expected to move once the import completes.
+**Parity direction when Studio catches up:** the active Decision schema expresses
+the shared `links` grammar with editor-checkable constraints (exactly one
+`{<linkType>: <pathRef>}` pair, `~/` or `@workspace/` prefix, optional
+cardinality). `@workspec/schema-core`'s generated `linksField`, and the mirrored
+implementation in `@workspec/c4-schema`, currently emit an unconstrained object
+because their entry rules live in a Zod `superRefine`, which does not survive
+JSON Schema generation. Reconciliation must port this file's representation
+into **both** implementations — regenerating this file from the current generator
+would silently discard those constraints; changing only `schema-core` would fix
+the req family while leaving the separately generated c4 family unchecked.
+
+Two packages currently contribute:
+
+- `@workspec/decision-schema` (Decision, Catalog) — currently being corrected in
+  [`FieldstateNZ/workspec-studio`](https://github.com/FieldstateNZ/workspec-studio)
+  to adopt the registry's lean Decision core. Until that lands, the generated
+  Studio schema is intentionally not the source of the active registry file.
 - `@workspec/c4-schema` (the `v1alpha1/c4/` family) — Zod model source in the
   [`FieldstateNZ/workspec-studio`](https://github.com/FieldstateNZ/workspec-studio)
   monorepo, under `packages/c4-schema`.
