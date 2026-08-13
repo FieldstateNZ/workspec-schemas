@@ -88,6 +88,16 @@ Studio tooling. `decision.schema.backup.json` preserves the registry's displaced
 historical contract under a distinct, deprecated `$id`; it is not the active
 Decision schema or a general compatibility target for current Studio artifacts.
 
+**Parity direction when Studio catches up:** the active Decision schema expresses
+the shared `links` grammar with editor-checkable constraints (exactly one
+`{<linkType>: <pathRef>}` pair, `~/` or `@workspace/` prefix, optional
+cardinality). `@workspec/schema-core`'s generated `linksField` currently emits an
+unconstrained object because its entry rules live in a Zod `superRefine`, which
+does not survive JSON Schema generation. Reconciliation must port this file's
+representation **into** `schema-core` — regenerating this file from the current
+generator would silently discard those constraints and leave the c4 and req
+families unchecked as well.
+
 Two packages currently contribute:
 
 - `@workspec/decision-schema` (Decision, Catalog) — currently being corrected in
