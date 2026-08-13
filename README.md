@@ -91,12 +91,13 @@ Decision schema or a general compatibility target for current Studio artifacts.
 **Parity direction when Studio catches up:** the active Decision schema expresses
 the shared `links` grammar with editor-checkable constraints (exactly one
 `{<linkType>: <pathRef>}` pair, `~/` or `@workspace/` prefix, optional
-cardinality). `@workspec/schema-core`'s generated `linksField` currently emits an
-unconstrained object because its entry rules live in a Zod `superRefine`, which
-does not survive JSON Schema generation. Reconciliation must port this file's
-representation **into** `schema-core` — regenerating this file from the current
-generator would silently discard those constraints and leave the c4 and req
-families unchecked as well.
+cardinality). `@workspec/schema-core`'s generated `linksField`, and the mirrored
+implementation in `@workspec/c4-schema`, currently emit an unconstrained object
+because their entry rules live in a Zod `superRefine`, which does not survive
+JSON Schema generation. Reconciliation must port this file's representation
+into **both** implementations — regenerating this file from the current generator
+would silently discard those constraints; changing only `schema-core` would fix
+the req family while leaving the separately generated c4 family unchecked.
 
 Two packages currently contribute:
 
